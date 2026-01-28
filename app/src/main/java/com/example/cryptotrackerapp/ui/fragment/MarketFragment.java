@@ -6,6 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import androidx.appcompat.widget.SearchView;
+
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -24,6 +26,7 @@ import com.example.cryptotrackerapp.data.model.Coin;
 import com.example.cryptotrackerapp.data.model.HeroCoin;
 import com.example.cryptotrackerapp.ui.adapter.CoinAdapter;
 import com.example.cryptotrackerapp.ui.viewmodel.MarketViewModel;
+import com.google.android.material.chip.ChipGroup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,20 +46,20 @@ public class MarketFragment extends Fragment {
     private TextView heroCoinName;
     private TextView heroCoinPrice;
 
+    private ChipGroup categoryChipGroup;
+    private SearchView searchView;
+
     private final List<HeroCoin> heroCoins = new ArrayList<>();
     private int heroIndex = 0;
-    private boolean heroInitialized = false;
-
-    private View heroView;
-
+    private boolean heroRunning = false;
 
     private final Runnable heroRunnable = new Runnable() {
         @Override
         public void run() {
-            rotateHero();
-            if (heroView != null) {
-                heroView.postDelayed(this, 5000);
-            }
+            if (!heroRunning || heroCoins.isEmpty()) return;
+            heroIndex = (heroIndex + 1) % heroCoins.size();
+            updateHero();
+            heroCoinImage.postDelayed(this, 5000);
         }
     };
 
@@ -77,11 +80,9 @@ public class MarketFragment extends Fragment {
     ) {
         super.onViewCreated(view, savedInstanceState);
 
-
         heroCoinImage = view.findViewById(R.id.heroCoinImage);
         heroCoinName = view.findViewById(R.id.heroCoinName);
         heroCoinPrice = view.findViewById(R.id.heroCoinPrice);
-        heroView = heroCoinImage;
 
         progressBar = view.findViewById(R.id.progressBar);
         errorLayout = view.findViewById(R.id.errorLayout);
@@ -89,72 +90,84 @@ public class MarketFragment extends Fragment {
 
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
-
-        view.findViewById(R.id.retryButton)
-                .setOnClickListener(v -> viewModel.refreshCoins());
+        categoryChipGroup = view.findViewById(R.id.categoryChipGroup);
+        searchView = view.findViewById(R.id.searchView);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerView.setItemAnimator(null); // performance
+        recyclerView.setItemAnimator(null);
         adapter = new CoinAdapter(this::navigateToDetail);
         recyclerView.setAdapter(adapter);
 
         viewModel = new ViewModelProvider(this).get(MarketViewModel.class);
 
-        swipeRefreshLayout.setOnRefreshListener(() -> viewModel.refreshCoins());
+        swipeRefreshLayout.setOnRefreshListener(viewModel::refreshCoins);
+        view.findViewById(R.id.retryButton)
+                .setOnClickListener(v -> viewModel.refreshCoins());
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                handleSearch(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                handleSearch(newText);
+                return true;
+            }
+        });
+
+        categoryChipGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            stopHero();
+            showLoading();
+            searchView.setQuery("", false);
+            searchView.clearFocus();
+
+            if (checkedId == R.id.chipTop) {
+                viewModel.loadTopCoins();
+            } else if (checkedId == R.id.chipTrending) {
+                viewModel.loadTrendingCoins();
+            } else if (checkedId == R.id.chipGainers) {
+                viewModel.loadGainers();
+            } else if (checkedId == R.id.chipLosers) {
+                viewModel.loadLosers();
+            }
+        });
 
         observeCoins();
-
         showLoading();
         viewModel.refreshCoins();
     }
 
-
-    private void navigateToDetail(Coin coin) {
-        if (!isAdded()) return;
-
-        NavController navController =
-                NavHostFragment.findNavController(this);
-
-        if (navController.getCurrentDestination() != null &&
-                navController.getCurrentDestination().getId()
-                        == R.id.marketFragment) {
-
-            Bundle bundle = new Bundle();
-            bundle.putString("coin_id", coin.id);
-
-            navController.navigate(
-                    R.id.action_marketFragment_to_coinDetailFragment,
-                    bundle
-            );
+    private void handleSearch(String query) {
+        stopHero();
+        if (query == null || query.trim().isEmpty()) {
+            viewModel.loadTopCoins();
+        } else {
+            viewModel.searchCoins(query.trim());
         }
     }
 
     private void observeCoins() {
-        viewModel.getAllCoins()
-                .observe(getViewLifecycleOwner(), coins -> {
+        viewModel.getAllCoins().observe(getViewLifecycleOwner(), coins -> {
+            swipeRefreshLayout.setRefreshing(false);
 
-                    swipeRefreshLayout.setRefreshing(false);
+            if (coins == null) {
+                showError();
+                return;
+            }
 
-                    if (coins == null) {
-                        showError();
-                        return;
-                    }
+            if (coins.isEmpty()) {
+                showEmpty();
+                return;
+            }
 
-                    if (coins.isEmpty()) {
-                        showEmpty();
-                        return;
-                    }
-
-                    showList();
-                    adapter.submitList(coins);
-
-                    if (!heroInitialized) {
-                        setupHeroCoins(coins);
-                        updateHero();
-                        heroView.postDelayed(heroRunnable, 5000);
-                        heroInitialized = true;
-                    }
-                });
+            showList();
+            adapter.submitList(new ArrayList<>(coins));
+            setupHeroCoins(coins);
+            startHero();
+        });
     }
 
     private void setupHeroCoins(List<Coin> coins) {
@@ -164,29 +177,28 @@ public class MarketFragment extends Fragment {
         int count = Math.min(5, coins.size());
         for (int i = 0; i < count; i++) {
             Coin c = coins.get(i);
-            heroCoins.add(
-                    new HeroCoin(
-                            c.name,
-                            String.format(
-                                    Locale.US,
-                                    "$%,.2f",
-                                    c.currentPrice
-                            ),
-                            c.image
-                    )
-            );
+            heroCoins.add(new HeroCoin(
+                    c.name,
+                    String.format(Locale.US, "$%,.2f", c.currentPrice),
+                    c.image
+            ));
         }
     }
 
-    private void rotateHero() {
+    private void startHero() {
         if (heroCoins.isEmpty()) return;
-        heroIndex = (heroIndex + 1) % heroCoins.size();
+        heroRunning = true;
         updateHero();
+        heroCoinImage.postDelayed(heroRunnable, 5000);
+    }
+
+    private void stopHero() {
+        heroRunning = false;
+        heroCoinImage.removeCallbacks(heroRunnable);
     }
 
     private void updateHero() {
         HeroCoin coin = heroCoins.get(heroIndex);
-
         heroCoinName.setText(coin.name);
         heroCoinPrice.setText(coin.priceText);
 
@@ -196,6 +208,21 @@ public class MarketFragment extends Fragment {
                 .into(heroCoinImage);
     }
 
+    private void navigateToDetail(Coin coin) {
+        if (!isAdded()) return;
+
+        NavController navController = NavHostFragment.findNavController(this);
+        if (navController.getCurrentDestination() != null &&
+                navController.getCurrentDestination().getId() == R.id.marketFragment) {
+
+            Bundle bundle = new Bundle();
+            bundle.putString("coin_id", coin.id);
+            navController.navigate(
+                    R.id.action_marketFragment_to_coinDetailFragment,
+                    bundle
+            );
+        }
+    }
 
     private void showLoading() {
         progressBar.setVisibility(View.VISIBLE);
@@ -223,10 +250,7 @@ public class MarketFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
+        stopHero();
         super.onDestroyView();
-        heroInitialized = false;
-        if (heroView != null) {
-            heroView.removeCallbacks(heroRunnable);
-        }
     }
 }

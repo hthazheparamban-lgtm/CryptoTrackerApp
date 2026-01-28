@@ -5,10 +5,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.robinhood.spark.SparkView;
+
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
 import com.example.cryptotrackerapp.R;
 import com.example.cryptotrackerapp.data.model.Coin;
@@ -31,27 +35,40 @@ public class CoinAdapter extends ListAdapter<Coin, CoinAdapter.CoinViewHolder> {
     private static final DiffUtil.ItemCallback<Coin> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<Coin>() {
                 @Override
-                public boolean areItemsTheSame(@NonNull Coin oldItem, @NonNull Coin newItem) {
+                public boolean areItemsTheSame(
+                        @NonNull Coin oldItem,
+                        @NonNull Coin newItem
+                ) {
                     return oldItem.id.equals(newItem.id);
                 }
 
                 @Override
-                public boolean areContentsTheSame(@NonNull Coin oldItem, @NonNull Coin newItem) {
+                public boolean areContentsTheSame(
+                        @NonNull Coin oldItem,
+                        @NonNull Coin newItem
+                ) {
                     return oldItem.currentPrice == newItem.currentPrice &&
-                            oldItem.priceChangePercentage24h == newItem.priceChangePercentage24h;
+                            oldItem.priceChangePercentage24h ==
+                                    newItem.priceChangePercentage24h;
                 }
             };
 
     @NonNull
     @Override
-    public CoinViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public CoinViewHolder onCreateViewHolder(
+            @NonNull ViewGroup parent,
+            int viewType
+    ) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_coin, parent, false);
         return new CoinViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CoinViewHolder holder, int position) {
+    public void onBindViewHolder(
+            @NonNull CoinViewHolder holder,
+            int position
+    ) {
         Coin coin = getItem(position);
 
         holder.name.setText(
@@ -69,6 +86,7 @@ public class CoinAdapter extends ListAdapter<Coin, CoinAdapter.CoinViewHolder> {
         int color = coin.priceChangePercentage24h >= 0
                 ? R.color.green
                 : R.color.red;
+
         holder.change.setTextColor(
                 holder.itemView.getContext().getColor(color)
         );
@@ -78,18 +96,36 @@ public class CoinAdapter extends ListAdapter<Coin, CoinAdapter.CoinViewHolder> {
                 .placeholder(R.drawable.ic_coin_placeholder)
                 .into(holder.icon);
 
+        if (coin.sparkline != null && coin.sparkline.price != null) {
+            holder.sparkView.setAdapter(
+                    new CoinSparkAdapter(coin.sparkline.price)
+            );
+
+            int lineColor = coin.priceChangePercentage24h >= 0
+                    ? holder.itemView.getContext().getColor(R.color.green)
+                    : holder.itemView.getContext().getColor(R.color.red);
+
+            holder.sparkView.setLineColor(lineColor);
+        } else {
+            holder.sparkView.setAdapter(null);
+        }
+
+
 
         holder.itemView.setOnClickListener(v -> {
             v.setEnabled(false);
             listener.onCoinClick(coin);
-            v.postDelayed(() -> v.setEnabled(true), 800);
+            v.postDelayed(() -> v.setEnabled(true), 600);
         });
     }
 
     static class CoinViewHolder extends RecyclerView.ViewHolder {
 
         ImageView icon;
-        TextView name, price, change;
+        TextView name;
+        TextView price;
+        TextView change;
+        SparkView sparkView;
 
         CoinViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -97,6 +133,7 @@ public class CoinAdapter extends ListAdapter<Coin, CoinAdapter.CoinViewHolder> {
             name = itemView.findViewById(R.id.coinName);
             price = itemView.findViewById(R.id.coinPrice);
             change = itemView.findViewById(R.id.coinChange);
+            sparkView = itemView.findViewById(R.id.sparkView);
         }
     }
 }

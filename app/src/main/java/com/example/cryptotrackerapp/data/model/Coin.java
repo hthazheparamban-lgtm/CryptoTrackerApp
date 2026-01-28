@@ -1,11 +1,15 @@
-
 package com.example.cryptotrackerapp.data.model;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
 
+import com.example.cryptotrackerapp.data.db.SparklineConverter;
 import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
 
 @Entity(tableName = "coins")
 public class Coin {
@@ -32,4 +36,13 @@ public class Coin {
 
     @SerializedName("image")
     public String image;
+
+    @SerializedName("sparkline_in_7d")
+    @TypeConverters(SparklineConverter.class)
+    public Sparkline sparkline;
+
+    public static class Sparkline {
+        @SerializedName("price")
+        public List<Float> price;
+    }
 }

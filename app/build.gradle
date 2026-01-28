@@ -44,4 +44,6 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui:2.7.2'
     implementation 'io.coil-kt:coil:2.4.0'
     implementation 'androidx.work:work-runtime:2.8.1'
+    implementation "com.robinhood.spark:spark:1.2.0"
+
 }
