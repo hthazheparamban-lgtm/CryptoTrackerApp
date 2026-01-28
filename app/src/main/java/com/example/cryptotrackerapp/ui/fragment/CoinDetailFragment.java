@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,6 +19,7 @@ import com.example.cryptotrackerapp.R;
 import com.example.cryptotrackerapp.data.model.WatchlistCoin;
 import com.example.cryptotrackerapp.ui.viewmodel.CoinDetailViewModel;
 import com.example.cryptotrackerapp.ui.viewmodel.WatchlistViewModel;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 import java.util.Locale;
 
@@ -28,12 +28,12 @@ public class CoinDetailFragment extends Fragment {
     private CoinDetailViewModel coinDetailViewModel;
     private WatchlistViewModel watchlistViewModel;
 
-    private ImageView coinImage;
-    private TextView coinName;
-    private TextView coinSymbol;
-    private TextView coinPrice;
-    private TextView coinChange;
-    private ProgressBar progressBar;
+    private CircularProgressIndicator progressBar;
+    private ImageView heroCoinImage;
+    private TextView heroCoinPrice;
+    private TextView coinMarketCap;
+    private TextView coinVolume;
+    private TextView coinDescription;
     private Button addToWatchlistBtn;
 
     private String coinId;
@@ -55,19 +55,21 @@ public class CoinDetailFragment extends Fragment {
     ) {
         super.onViewCreated(view, savedInstanceState);
 
-        coinImage = view.findViewById(R.id.coinImage);
-        coinName = view.findViewById(R.id.coinName);
-        coinSymbol = view.findViewById(R.id.coinSymbol);
-        coinPrice = view.findViewById(R.id.coinPrice);
-        coinChange = view.findViewById(R.id.coinChange);
+
         progressBar = view.findViewById(R.id.progressBar);
+        heroCoinImage = view.findViewById(R.id.heroCoinImage);
+        heroCoinPrice = view.findViewById(R.id.heroCoinPrice);
+        coinMarketCap = view.findViewById(R.id.coinMarketCap);
+        coinVolume = view.findViewById(R.id.coinVolume);
+        coinDescription = view.findViewById(R.id.coinDescription);
         addToWatchlistBtn = view.findViewById(R.id.addToWatchlistBtn);
 
-        coinDetailViewModel =
-                new ViewModelProvider(this).get(CoinDetailViewModel.class);
+        coinDetailViewModel = new ViewModelProvider(this)
+                .get(CoinDetailViewModel.class);
 
-        watchlistViewModel =
-                new ViewModelProvider(this).get(WatchlistViewModel.class);
+        watchlistViewModel = new ViewModelProvider(this)
+                .get(WatchlistViewModel.class);
+
 
         if (getArguments() != null) {
             coinId = getArguments().getString("coin_id");
@@ -79,21 +81,22 @@ public class CoinDetailFragment extends Fragment {
         }
 
         observeCoinDetail();
+
+
+        progressBar.setVisibility(View.VISIBLE);
+
         coinDetailViewModel.loadCoinDetail(coinId);
     }
 
     private void observeCoinDetail() {
-        coinDetailViewModel.getCoinDetail().observe(
-                getViewLifecycleOwner(),
-                coin -> {
-                    if (coin == null) return;
+        coinDetailViewModel.getCoinDetail()
+                .observe(getViewLifecycleOwner(), coin -> {
+
+                    if (coin == null || !isAdded()) return;
 
                     progressBar.setVisibility(View.GONE);
 
-                    coinName.setText(coin.name);
-                    coinSymbol.setText(coin.symbol.toUpperCase(Locale.US));
-
-                    coinPrice.setText(
+                    heroCoinPrice.setText(
                             String.format(
                                     Locale.US,
                                     "$%,.2f",
@@ -101,23 +104,33 @@ public class CoinDetailFragment extends Fragment {
                             )
                     );
 
-                    coinChange.setText(
+
+                    coinMarketCap.setText(
                             String.format(
                                     Locale.US,
-                                    "%.2f%%",
-                                    coin.marketData.priceChangePercentage24h
+                                    "Market Cap: $%,.0f",
+                                    coin.marketData.marketCap.usd
                             )
                     );
 
-                    int color = coin.marketData.priceChangePercentage24h >= 0
-                            ? R.color.green
-                            : R.color.red;
+                    if (coin.description != null && coin.description.en != null &&
+                            !coin.description.en.isEmpty()) {
+                        coinDescription.setText(
+                                android.text.Html.fromHtml(
+                                        coin.description.en,
+                                        android.text.Html.FROM_HTML_MODE_LEGACY
+                                )
+                        );
+                    } else {
+                        coinDescription.setText("No description available.");
+                    }
 
-                    coinChange.setTextColor(requireContext().getColor(color));
 
                     Glide.with(this)
                             .load(coin.image.large)
-                            .into(coinImage);
+                            .placeholder(R.drawable.ic_coin_placeholder)
+                            .into(heroCoinImage);
+
 
                     addToWatchlistBtn.setOnClickListener(v -> {
                         WatchlistCoin watchlistCoin = new WatchlistCoin(
@@ -130,13 +143,13 @@ public class CoinDetailFragment extends Fragment {
                         );
 
                         watchlistViewModel.add(watchlistCoin);
+
                         Toast.makeText(
                                 requireContext(),
                                 "Added to Watchlist",
                                 Toast.LENGTH_SHORT
                         ).show();
                     });
-                }
-        );
+                });
     }
 }
