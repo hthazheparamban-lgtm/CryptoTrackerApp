@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">CryptoTrackerApp</string>
+    <string name="app_name">CryptoTracker</string>
+    <string name="coin_image">Coin image</string>
 </resources>

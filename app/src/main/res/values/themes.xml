@@ -1,5 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.CryptoTrackerApp" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Optional app-level theme (can be removed if unused) -->
+    <style name="Theme.CryptoTrackerApp"
+        parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    </style>
+
+    <!-- MAIN APP THEME (ONLY ONCE) -->
+    <style name="Theme.CryptoTracker"
+        parent="Theme.Material3.DayNight.NoActionBar">
+
+        <item name="toolbarStyle">@style/CryptoToolbar</item>
+
+    </style>
+
+    <!-- Toolbar style -->
+    <style name="CryptoToolbar"
+        parent="Widget.Material3.Toolbar">
+        <item name="titleTextAppearance">@style/CryptoLogoText</item>
+    </style>
+
+    <!-- Logo text style -->
+    <style name="CryptoLogoText"
+        parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.15</item>
+    </style>
+
 </resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/marketFragment">
+
+    <fragment
+        android:id="@+id/marketFragment"
+        android:name="com.example.cryptotrackerapp.ui.fragment.MarketFragment"
+        android:label="Market">
+
+        <action
+            android:id="@+id/action_marketFragment_to_coinDetailFragment"
+            app:destination="@id/coinDetailFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/coinDetailFragment"
+        android:name="com.example.cryptotrackerapp.ui.fragment.CoinDetailFragment"
+        android:label="Coin Detail"/>
+</navigation>
