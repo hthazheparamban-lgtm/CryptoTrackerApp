@@ -9,13 +9,13 @@
     app:cardElevation="4dp">
 
     <LinearLayout
-
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:padding="16dp">
 
+        <!-- Coin Image -->
         <ImageView
             android:id="@+id/coinImage"
             android:layout_width="40dp"
@@ -24,7 +24,7 @@
             android:scaleType="centerCrop"
             android:contentDescription="@string/coin_image"/>
 
-
+        <!-- Name + Symbol -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -35,7 +35,6 @@
                 android:id="@+id/coinName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bitcoin"
                 android:textSize="16sp"
                 android:textStyle="bold"/>
 
@@ -43,12 +42,18 @@
                 android:id="@+id/coinSymbol"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="BTC"
                 android:textSize="14sp"
                 android:alpha="0.6"/>
         </LinearLayout>
 
+        <!-- Sparkline -->
+        <com.robinhood.spark.SparkView
+            android:id="@+id/sparkView"
+            android:layout_width="60dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="12dp"/>
 
+        <!-- Price + Change -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -59,7 +64,6 @@
                 android:id="@+id/coinPrice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="$42,000"
                 android:textSize="16sp"
                 android:textStyle="bold"/>
 
@@ -67,7 +71,6 @@
                 android:id="@+id/coinChange"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="+2.4%"
                 android:textSize="14sp"/>
         </LinearLayout>
 

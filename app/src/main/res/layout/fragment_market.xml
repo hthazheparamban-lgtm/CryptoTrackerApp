@@ -5,10 +5,62 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:fitsSystemWindows="true"
-    >
+    android:fitsSystemWindows="true">
+
 
     <include layout="@layout/hero_coin"/>
+
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:queryHint="Search coins"
+        android:iconifiedByDefault="false"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp" />
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/categoryChipGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        app:singleSelection="true"
+        app:selectionRequired="true">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipTop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Top 100"
+            android:checkable="true"
+            android:checked="true"
+            app:checkedIconVisible="false"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipTrending"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Trending"
+            android:checkable="true"
+            app:checkedIconVisible="false"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipGainers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Gainers"
+            android:checkable="true"
+            app:checkedIconVisible="false"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipLosers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Losers"
+            android:checkable="true"
+            app:checkedIconVisible="false"/>
+
+    </com.google.android.material.chip.ChipGroup>
+
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -23,8 +75,9 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingBottom="8dp"/>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
         <ProgressBar
@@ -47,7 +100,7 @@
                 android:id="@+id/errorText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Failed to load data"
+                android:text="@string/error_load"
                 android:textSize="16sp"
                 android:padding="8dp"/>
 
@@ -55,7 +108,7 @@
                 android:id="@+id/retryButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Retry"/>
+                android:text="@string/retry"/>
         </LinearLayout>
 
         <TextView
@@ -63,7 +116,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="No coins available"
+            android:text="@string/empty_coins"
             android:textSize="16sp"
             android:visibility="gone"/>
 

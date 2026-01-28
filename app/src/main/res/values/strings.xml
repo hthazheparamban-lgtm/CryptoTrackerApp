@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">CryptoTracker</string>
     <string name="coin_image">Coin image</string>
+    <string name="error_load">Failed to load data</string>
+    <string name="retry">Retry</string>
+    <string name="empty_coins">No coins available</string>
+
 </resources>
