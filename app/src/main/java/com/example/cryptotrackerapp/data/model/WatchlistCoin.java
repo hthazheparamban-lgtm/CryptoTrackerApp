@@ -16,7 +16,6 @@ public class WatchlistCoin {
     public double price;
     public String imageUrl;
 
-    // 👇 REQUIRED for reorder
     public int position;
 
     public WatchlistCoin() {}

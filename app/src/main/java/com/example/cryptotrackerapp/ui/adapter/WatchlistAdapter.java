@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.cryptotrackerapp.R;
 import com.example.cryptotrackerapp.data.model.WatchlistCoin;
 
@@ -21,7 +22,7 @@ public class WatchlistAdapter
 
     private final List<WatchlistCoin> items = new ArrayList<>();
 
-    // ---------------- DATA ----------------
+
 
     public void submit(List<WatchlistCoin> coins) {
         items.clear();
@@ -62,9 +63,16 @@ public class WatchlistAdapter
         WatchlistCoin c = items.get(position);
 
         h.name.setText(c.name);
-        h.symbol.setText(c.symbol);
-        h.price.setText("$" + c.price);
+        h.symbol.setText(c.symbol.toUpperCase());
+        h.price.setText(String.format("$%.2f", c.price));
+
+        Glide.with(h.itemView)
+                .load(c.imageUrl)
+                .placeholder(R.drawable.ic_coin_placeholder)
+                .error(R.drawable.ic_coin_placeholder)
+                .into(h.icon);
     }
+
 
     @Override
     public int getItemCount() {

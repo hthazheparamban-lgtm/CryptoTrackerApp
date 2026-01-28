@@ -4,21 +4,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <Button
-        android:id="@+id/addToWatchlistBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Add to Watchlist"
-        android:layout_margin="16dp"
-        android:backgroundTint="@color/black"
-        android:textColor="@android:color/white"/>
 
-
-
+    <!-- APP BAR -->
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="240dp"
+        android:layout_height="260dp"
         android:theme="@style/ThemeOverlay.Material3.Dark.ActionBar">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
@@ -28,6 +18,15 @@
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:titleEnabled="true">
 
+            <!-- Coin Logo -->
+            <ImageView
+                android:id="@+id/coinLogo"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_gravity="center"
+                android:scaleType="centerInside"
+                android:contentDescription="@string/coin_image"
+                app:layout_collapseMode="parallax" />
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
@@ -38,20 +37,18 @@
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-
+    <!-- CONTENT -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
-            android:layout_height="220dp"
-            android:layout_margin="16dp"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="10dp"
             android:layout_width="match_parent"
-            android:background="@color/material_dynamic_neutral90"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
             android:orientation="vertical"
+            android:background="@color/material_dynamic_neutral90"
             android:padding="16dp">
 
             <com.google.android.material.progressindicator.CircularProgressIndicator
@@ -59,36 +56,30 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_gravity="center"
-                android:visibility="visible"
                 android:indeterminate="true" />
 
-
             <TextView
-                android:id="@+id/heroCoinPrice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:id="@+id/coinPrice"
                 android:text="$0.00"
                 android:textSize="28sp"
-                android:textStyle="bold"/>
-
+                android:textStyle="bold"
+                android:layout_marginTop="12dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
             <TextView
                 android:id="@+id/coinMarketCap"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="Market Cap: --"
-                android:paddingTop="8dp"
-                android:textSize="14sp"/>
-
+                android:layout_marginTop="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
             <TextView
                 android:id="@+id/coinVolume"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="24h Volume: --"
-                android:paddingTop="4dp"
-                android:textSize="14sp"/>
-
+                android:layout_marginTop="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
             <View
                 android:layout_width="match_parent"
@@ -96,33 +87,32 @@
                 android:layout_marginVertical="16dp"
                 android:background="#DDDDDD"/>
 
-
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="Description"
                 android:textSize="18sp"
-                android:textStyle="bold"/>
-
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
             <TextView
                 android:id="@+id/coinDescription"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:text="Loading description..."
-                android:paddingTop="8dp"
-                android:textSize="14sp"/>
-
-            <ImageView
-                android:id="@+id/heroCoinImage"
+                android:layout_marginTop="8dp"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/coin_image"
-                android:padding="32dp"
-                android:scaleType="centerInside"
-                app:layout_collapseMode="parallax" />
+                android:layout_height="wrap_content"/>
 
         </LinearLayout>
     </ScrollView>
+
+    <!-- WATCHLIST BUTTON -->
+    <Button
+        android:id="@+id/addToWatchlistBtn"
+        android:text="Add to Watchlist"
+        android:layout_gravity="bottom"
+        android:layout_margin="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/black"
+        android:textColor="@android:color/white"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
