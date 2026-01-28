@@ -4,6 +4,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <Button
+        android:id="@+id/addToWatchlistBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add to Watchlist"
+        android:layout_margin="16dp"
+        android:backgroundTint="@color/black"
+        android:textColor="@android:color/white"/>
+
 
 
     <com.google.android.material.appbar.AppBarLayout

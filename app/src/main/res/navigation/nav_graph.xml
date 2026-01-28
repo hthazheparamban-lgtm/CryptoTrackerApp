@@ -13,10 +13,19 @@
         <action
             android:id="@+id/action_marketFragment_to_coinDetailFragment"
             app:destination="@id/coinDetailFragment"/>
+
+        <action
+            android:id="@+id/action_marketFragment_to_watchlistFragment"
+            app:destination="@id/watchlistFragment"/>
     </fragment>
 
     <fragment
         android:id="@+id/coinDetailFragment"
         android:name="com.example.cryptotrackerapp.ui.fragment.CoinDetailFragment"
         android:label="Coin Detail"/>
+
+    <fragment
+        android:id="@+id/watchlistFragment"
+        android:name="com.example.cryptotrackerapp.ui.fragment.WatchlistFragment"
+        android:label="Watchlist"/>
 </navigation>

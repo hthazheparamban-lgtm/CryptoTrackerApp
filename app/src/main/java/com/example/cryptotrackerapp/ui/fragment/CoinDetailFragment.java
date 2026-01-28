@@ -1,31 +1,42 @@
 package com.example.cryptotrackerapp.ui.fragment;
 
 import android.os.Bundle;
-import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.bumptech.glide.Glide;
 import com.example.cryptotrackerapp.R;
-import com.example.cryptotrackerapp.data.api.CoinGeckoApi;
-import com.example.cryptotrackerapp.data.model.CoinDetail;
-import com.example.cryptotrackerapp.data.api.RetrofitClient;
-import com.google.android.material.appbar.CollapsingToolbarLayout;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import com.example.cryptotrackerapp.data.model.WatchlistCoin;
+import com.example.cryptotrackerapp.ui.viewmodel.CoinDetailViewModel;
+import com.example.cryptotrackerapp.ui.viewmodel.WatchlistViewModel;
+
+import java.util.Locale;
 
 public class CoinDetailFragment extends Fragment {
 
+    private CoinDetailViewModel coinDetailViewModel;
+    private WatchlistViewModel watchlistViewModel;
+
     private ImageView coinImage;
-    private TextView coinPrice, coinMarketCap, coinVolume, coinDescription;
-    private CollapsingToolbarLayout collapsingToolbar;
+    private TextView coinName;
+    private TextView coinSymbol;
+    private TextView coinPrice;
+    private TextView coinChange;
+    private ProgressBar progressBar;
+    private Button addToWatchlistBtn;
+
+    private String coinId;
 
     @Nullable
     @Override
@@ -38,102 +49,94 @@ public class CoinDetailFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(
+            @NonNull View view,
+            @Nullable Bundle savedInstanceState
+    ) {
         super.onViewCreated(view, savedInstanceState);
 
+        coinImage = view.findViewById(R.id.coinImage);
+        coinName = view.findViewById(R.id.coinName);
+        coinSymbol = view.findViewById(R.id.coinSymbol);
+        coinPrice = view.findViewById(R.id.coinPrice);
+        coinChange = view.findViewById(R.id.coinChange);
+        progressBar = view.findViewById(R.id.progressBar);
+        addToWatchlistBtn = view.findViewById(R.id.addToWatchlistBtn);
 
-        coinImage = view.findViewById(R.id.heroCoinImage);
-        coinPrice = view.findViewById(R.id.heroCoinPrice);
+        coinDetailViewModel =
+                new ViewModelProvider(this).get(CoinDetailViewModel.class);
 
-        coinMarketCap = view.findViewById(R.id.coinMarketCap);
-        coinVolume = view.findViewById(R.id.coinVolume);
-        coinDescription = view.findViewById(R.id.coinDescription);
-        collapsingToolbar = view.findViewById(R.id.collapsingToolbar);
+        watchlistViewModel =
+                new ViewModelProvider(this).get(WatchlistViewModel.class);
 
-
-        String coinId = getArguments() != null
-                ? getArguments().getString("coin_id")
-                : null;
+        if (getArguments() != null) {
+            coinId = getArguments().getString("coin_id");
+        }
 
         if (coinId == null) {
-            Log.e("CoinDetail", "coin_id is NULL");
+            Toast.makeText(requireContext(), "Invalid coin", Toast.LENGTH_SHORT).show();
             return;
         }
 
-
-        coinPrice.setText("Loading...");
-        coinMarketCap.setText("Market Cap: --");
-        coinVolume.setText("24h Volume: --");
-        coinDescription.setText("Loading description...");
-
-        fetchCoinDetail(coinId);
+        observeCoinDetail();
+        coinDetailViewModel.loadCoinDetail(coinId);
     }
 
-    private void fetchCoinDetail(String coinId) {
-        CoinGeckoApi api = RetrofitClient
-                .getClient()
-                .create(CoinGeckoApi.class);
+    private void observeCoinDetail() {
+        coinDetailViewModel.getCoinDetail().observe(
+                getViewLifecycleOwner(),
+                coin -> {
+                    if (coin == null) return;
 
-        api.getCoinDetail(coinId).enqueue(new Callback<CoinDetail>() {
-            @Override
-            public void onResponse(
-                    @NonNull Call<CoinDetail> call,
-                    @NonNull Response<CoinDetail> response
-            ) {
+                    progressBar.setVisibility(View.GONE);
 
-                if (!response.isSuccessful() || response.body() == null) {
-                    Log.e("CoinDetail", "API response failed");
-                    return;
-                }
+                    coinName.setText(coin.name);
+                    coinSymbol.setText(coin.symbol.toUpperCase(Locale.US));
 
-                CoinDetail coin = response.body();
-
-
-                if (collapsingToolbar != null) {
-                    collapsingToolbar.setTitle(coin.name);
-                }
-
-
-                coinPrice.setText(
-                        "$" + String.format("%,.2f",
-                                coin.marketData.currentPrice.usd)
-                );
-
-
-                coinMarketCap.setText(
-                        "Market Cap: $" + String.format("%,.0f",
-                                coin.marketData.marketCap.usd)
-                );
-
-
-                coinVolume.setText(
-                        "24h Volume: $" + String.format("%,.0f",
-                                coin.marketData.volume.usd)
-                );
-
-                if (coin.description != null && coin.description.en != null) {
-                    coinDescription.setText(
-                            Html.fromHtml(
-                                    coin.description.en,
-                                    Html.FROM_HTML_MODE_LEGACY
+                    coinPrice.setText(
+                            String.format(
+                                    Locale.US,
+                                    "$%,.2f",
+                                    coin.marketData.currentPrice.usd
                             )
                     );
+
+                    coinChange.setText(
+                            String.format(
+                                    Locale.US,
+                                    "%.2f%%",
+                                    coin.marketData.priceChangePercentage24h
+                            )
+                    );
+
+                    int color = coin.marketData.priceChangePercentage24h >= 0
+                            ? R.color.green
+                            : R.color.red;
+
+                    coinChange.setTextColor(requireContext().getColor(color));
+
+                    Glide.with(this)
+                            .load(coin.image.large)
+                            .into(coinImage);
+
+                    addToWatchlistBtn.setOnClickListener(v -> {
+                        WatchlistCoin watchlistCoin = new WatchlistCoin(
+                                coin.id,
+                                coin.name,
+                                coin.symbol,
+                                coin.marketData.currentPrice.usd,
+                                coin.image.small,
+                                (int) System.currentTimeMillis()
+                        );
+
+                        watchlistViewModel.add(watchlistCoin);
+                        Toast.makeText(
+                                requireContext(),
+                                "Added to Watchlist",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    });
                 }
-
-                Glide.with(requireContext())
-                        .load(coin.image.large)
-                        .placeholder(R.drawable.ic_coin_placeholder)
-                        .error(R.drawable.ic_coin_placeholder)
-                        .into(coinImage);
-            }
-
-            @Override
-            public void onFailure(
-                    @NonNull Call<CoinDetail> call,
-                    @NonNull Throwable t
-            ) {
-                Log.e("CoinDetail", "API error", t);
-            }
-        });
+        );
     }
 }

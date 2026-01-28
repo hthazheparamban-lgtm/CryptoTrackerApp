@@ -120,6 +120,14 @@
             android:textSize="16sp"
             android:visibility="gone"/>
 
+
+
     </FrameLayout>
+    <Button
+        android:id="@+id/openWatchlistButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Watchlist"
+        android:layout_margin="8dp"/>
 
 </LinearLayout>

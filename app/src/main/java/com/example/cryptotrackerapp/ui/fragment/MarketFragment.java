@@ -97,6 +97,10 @@ public class MarketFragment extends Fragment {
         recyclerView.setItemAnimator(null);
         adapter = new CoinAdapter(this::navigateToDetail);
         recyclerView.setAdapter(adapter);
+        view.findViewById(R.id.openWatchlistButton).setOnClickListener(v ->
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.action_marketFragment_to_watchlistFragment)
+        );
 
         viewModel = new ViewModelProvider(this).get(MarketViewModel.class);
 
@@ -253,4 +257,5 @@ public class MarketFragment extends Fragment {
         stopHero();
         super.onDestroyView();
     }
+
 }
